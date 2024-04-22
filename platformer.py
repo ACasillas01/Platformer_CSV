@@ -97,14 +97,31 @@ class Player(pygame.sprite.Sprite):
         hits = pygame.sprite.spritecollide(self , platforms, False)
         if self.vel.y > 0: 
             if hits:    	
+                self.vel.y = 0
+                if len(hits) > 2:
+                    if self.pos.x < hits[2].rect.left : 
+                        self.pos.x = hits[2].rect.left - self.sprite.sprite_size/2
+                        self.pos.y = hits[2].rect.top + 1
+                        self.vel.y = 0
+                    if self.pos.x > hits[1].rect.right : 
+                        self.pos.x = hits[1].rect.right + self.sprite.sprite_size/2
+                        self.pos.y = hits[1].rect.top + 1
+                        self.vel.y = 0
+                else:
+                    if self.pos.x < hits[0].rect.left and self.jumping == True : 
+                        self.pos.x = hits[0].rect.left - self.sprite.sprite_size/2
+                        self.pos.y = hits[0].rect.top + 1
+                        self.vel.y = 0
+                    if self.pos.x > hits[0].rect.right and self.jumping == True: 
+                        self.pos.x = hits[0].rect.right + self.sprite.sprite_size/2
+                        self.pos.y = hits[0].rect.top + 1
+                        self.vel.y = 0
                 if self.pos.y < hits[0].rect.bottom : 
                     self.pos.y = hits[0].rect.top + 1
-                    self.vel.y = 0
                     self.jumping = False
-                if self.pos.x+self.sprite.sprite_size/2 < hits[0].rect.left : 
-                    self.pos.x = hits[0].rect.left - self.sprite.sprite_size/2
                     self.vel.y = 0
-                    self.jumping = False
+
+                
 
 
 class App():
