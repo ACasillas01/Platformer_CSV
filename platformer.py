@@ -1,5 +1,5 @@
 from __future__ import annotations
-from abc import ABC
+from abc import ABC, abstractmethod
 import pygame
 from pygame.locals import *
 import csv
@@ -123,6 +123,28 @@ class Player(pygame.sprite.Sprite):
 
                 
 
+# Interface for products
+class Bloque(ABC):
+    def draw(self) -> str:
+        ''' Draw a new block on the screen '''
+        pass
+
+# Concrete products
+class DirtBlock(Bloque):
+    def draw(self) -> int:
+        ''' Draw a new dirt block on the screen '''
+        return 1
+    
+class RockBlock(Bloque):
+    def draw(self) -> int:
+        ''' Draw a new rock block on the screen '''
+        return 2
+    
+class SkyBlock(Bloque):
+    def draw(self) -> int:
+        ''' Draw a new sky block on the screen '''
+        return 0
+
 
 class App():
     """A class representing a generic platformer game game. """
@@ -143,7 +165,7 @@ class App():
 
         all_sprites.add(self.player)
 
-        self.sky = pygame.image.load(Assets.SKY.value);
+        self.sky = pygame.image.load(Assets.SKY.value)
         self.sky = pygame.transform.scale(self.sky, (self.width, self.height))
 
 
@@ -154,11 +176,21 @@ class App():
         self._running = True
         self.draw_scenary()
 
-    def choose_block(self, x: int):
-        if x==0:
-            return Assets.SKY.value
-        if x==1:
-            return Assets.DIRT.value
+    # Factory
+    @abstractmethod
+    def create_block(self, tipo) -> Bloque:
+        ''' Factory method '''
+        return tipo.value
+
+    def choose_block(self, tipo) -> int:
+        ''' Choose the block to draw '''
+        return self.create_block(tipo).draw()
+
+    # def choose_block(self, x: int):
+    #     if x==0:
+    #         return Assets.SKY.value
+    #     if x==1:
+    #         return Assets.DIRT.value
     
     def draw_sky(self, screen):
         screen.blit(self.sky, (0, 0))
