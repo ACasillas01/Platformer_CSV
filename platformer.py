@@ -4,6 +4,8 @@ import pygame
 from pygame.locals import *
 import csv
 from enum import Enum
+import time
+import random
 
 vec = pygame.math.Vector2
 ACC = 0.8
@@ -12,6 +14,7 @@ FPS = 60
 WIDTH, HEIGHT = 800, 600
 all_sprites = pygame.sprite.Group()
 platforms = pygame.sprite.Group()
+coins = pygame.sprite.Group()
 
 class Assets(Enum):
         # name           # value
@@ -51,7 +54,7 @@ class Player(pygame.sprite.Sprite):
         self.acc = 0.5
         self.fric = -0.12
         self.jumping = False
-
+        self.score = 0
         self.pos = vec((x,y))
         self.vel = vec(0,0)
         self.acc = vec(0,0)
@@ -123,7 +126,7 @@ class Player(pygame.sprite.Sprite):
 
                 
 
-# Interface for products
+# Interface for products - Factory Method
 class Bloque(ABC):
     def draw(self) -> str:
         ''' Draw a new block on the screen '''
@@ -144,6 +147,22 @@ class SkyBlock(Bloque):
     def draw(self) -> int:
         ''' Draw a new sky block on the screen '''
         return 0
+	
+class Coin(pygame.sprite.Sprite):
+    def __init__(self, sprite: Sprite, x = 0, y = 0):
+        super().__init__()
+        self.x = x
+        self.y = y
+        self.sprite = sprite
+        self.surf = pygame.image.load(self.sprite.image_path)
+        self.surf = pygame.transform.scale(self.surf, (self.sprite.sprite_size, self.sprite.sprite_size))
+        self.rect = self.surf.get_rect(center = (self.x, self.y))
+ 
+ 
+    def update(self, player: Player):
+        if self.rect.colliderect(player.rect):
+            player.score += 5
+            self.kill()
 
 
 class App():
@@ -158,7 +177,7 @@ class App():
         self._running = True
         self.screen = None
         self.size = self.width, self.height = 800, 600
-        
+        self.chanceOfCoin = 0.01
         self.player = Player(Sprite('assets/player.png'), 15, self.height - 100)
 
         self.FramePerSec = pygame.time.Clock()
@@ -168,6 +187,8 @@ class App():
         self.sky = pygame.image.load(Assets.SKY.value)
         self.sky = pygame.transform.scale(self.sky, (self.width, self.height))
 
+    def generateCoin(self, x, y):
+        coins.add(Coin(Sprite("./assets/coin.png"), x, y))
 
     def on_init(self) -> bool: 
         """Called when the program is started"""
@@ -201,6 +222,9 @@ class App():
         for row in self.scene:
             for tile in row:
                 if tile == 0:
+                    if random.random() < self.chanceOfCoin and y >= 50:
+                        self.generateCoin(x,y)
+                        print("Coin Added!")
                     x +=50
                     continue
                 if tile == 1:
@@ -213,6 +237,10 @@ class App():
                 x +=50
             x = 25
             y+=50
+            
+        
+
+
         return
     
     def draw_scenary(self):
@@ -238,9 +266,29 @@ class App():
 
     def on_render(self):
         self.player.draw(self.screen)
+        f = pygame.font.SysFont("Verdana", 20)     ##
+        g  = f.render(str(self.player.score), True, (123,255,0))   ##
+        self.screen.blit(g, (WIDTH/2, 10))  
         #pygame.draw.rect(self.screen,(255,150,140),self.player)
+        if coins:
+            for coin in coins:
+                self.screen.blit(coin.surf, coin.rect)
+                coin.update(self.player)
+        else: self._running = False
+
+        
 
     def on_cleanup(self):
+        time.sleep(1)
+        self.screen.fill((255,0,0))
+        f = pygame.font.SysFont("Verdana", 20)     ##
+        g  = f.render(str("Game ended!"), True, (0,0,0))   ##
+        self.screen.blit(g, (WIDTH/2 -80, HEIGHT/2))  
+        g  = f.render(str(f"Score: {self.player.score} points!"), True, (0,0,0)) 
+        self.screen.blit(g, (WIDTH/2 -80, HEIGHT/2+50)) 
+
+        pygame.display.update()
+        time.sleep(3)
         pygame.quit()
 
     def on_execute(self) -> None: 
@@ -248,7 +296,6 @@ class App():
         if self.on_init() == False:
             self._running = False
         
-    
         while(self._running):
             for event in pygame.event.get():
                 self.on_event(event)
