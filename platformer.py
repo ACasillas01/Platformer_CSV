@@ -21,6 +21,7 @@ class Assets(Enum):
     SKY = './assets/sky.jpg'
     DIRT = './assets/O8WNFV0.jpg'
     ROCK = './assets/rock.png'
+    COIN = './assets/coin.png'
 
 class Block(pygame.sprite.Sprite):
     """Represents a block in the game."""
@@ -141,7 +142,7 @@ class Player(pygame.sprite.Sprite):
         if self.vel.y > 0: 
             if hits:    	
                 self.vel.y = 0
-                if len(hits) > 2:
+                if len(hits) > 2: #Checking for the players collision with multiple blocks (floor + wall)
                     if self.pos.x < hits[2].rect.left : 
                         self.pos.x = hits[2].rect.left - self.sprite.sprite_size/2
                         self.pos.y = hits[2].rect.top + 1
@@ -150,7 +151,7 @@ class Player(pygame.sprite.Sprite):
                         self.pos.x = hits[1].rect.right + self.sprite.sprite_size/2
                         self.pos.y = hits[1].rect.top + 1
                         self.vel.y = 0
-                else:
+                else: #Checking for the players collision with single blocks (floor)
                     if self.pos.x < hits[0].rect.left and self.jumping == True : 
                         self.pos.x = hits[0].rect.left - self.sprite.sprite_size/2
                         self.pos.y = hits[0].rect.top + 1
@@ -210,7 +211,7 @@ class Coin(pygame.sprite.Sprite):
  
     def update(self, player: Player):
         """
-        Update the coin's position and check for collisions with the player.
+        Update on the coin's existance and check for collisions with the player.
 
         Args:
             player (Player): The player object.
@@ -283,7 +284,7 @@ class App():
         """
         screen.blit(self.sky, (0, 0))
     
-    def draw_block(self, screen):
+    def draw_block(self, screen): #FLYWEIGHT - PATRON ESTRUCTURAL 
         """
         Draw blocks on the screen.
 
@@ -292,6 +293,9 @@ class App():
         """
         x = 25
         y = 25
+        #Flyweight variables
+        dirtSprite = Sprite(Assets.DIRT.value);
+        rockSprite = Sprite(Assets.ROCK.value);
         for row in self.scene:
             for tile in row:
                 if tile == 0:
@@ -301,9 +305,11 @@ class App():
                     x +=50
                     continue
                 if tile == 1:
-                    B = Block(Sprite(Assets.DIRT.value), x, y)
+                    #B = Block(Sprite(Assets.DIRT.value), x, y) = No Flyweight
+                    B = Block(dirtSprite, x, y)
                 if tile == 2:
-                    B = Block(Sprite(Assets.ROCK.value), x, y)
+                    #B = Block(Sprite(Assets.ROCK.value), x, y) = No Flyweight
+                    B = Block(rockSprite, x, y)
                 platforms.add(B)
                 all_sprites.add(B)
                 B.draw(self.screen)
