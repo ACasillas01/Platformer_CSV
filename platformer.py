@@ -168,27 +168,30 @@ class Player(pygame.sprite.Sprite):
 class Bloque(ABC):
     """Abstract class representing a block."""
     @abstractmethod
-    def draw(self) -> str:
+    def draw(self) -> Sprite:
         """Draw a new block on the screen."""
         pass
 
 class DirtBlock(Bloque):
     """Concrete class representing a dirt block."""
-    def draw(self) -> int:
+    def draw(self) -> Sprite:
         """Draw a new dirt block on the screen."""
-        return 1
+        dirt = Sprite(Assets.DIRT.value)
+        return dirt
     
 class RockBlock(Bloque):
     """Concrete class representing a rock block."""
-    def draw(self) -> int:
+    def draw(self) -> Sprite:
         """Draw a new rock block on the screen."""
-        return 2
+        rock = Sprite(Assets.ROCK.value)
+        return rock
     
 class SkyBlock(Bloque):
     """Concrete class representing a sky block."""
-    def draw(self) -> int:
+    def draw(self) -> Sprite:
         """Draw a new sky block on the screen."""
-        return 0
+        sky = Sprite(Assets.SKY.value)
+        return sky
 	
 class Coin(pygame.sprite.Sprite):
     """Represents a coin in the game."""
@@ -285,7 +288,7 @@ class App():
         screen.blit(self.sky, (0, 0))
 
     @abstractmethod
-    def create_block(self, x: int, y: int) -> Bloque:
+    def create_block(self, x: int, y: int):
         #Flyweight variables
         dirtSprite = Sprite(Assets.DIRT.value)
         rockSprite = Sprite(Assets.ROCK.value)
