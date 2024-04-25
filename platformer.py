@@ -17,14 +17,22 @@ platforms = pygame.sprite.Group()
 coins = pygame.sprite.Group()
 
 class Assets(Enum):
-        # name           # value
-        #SKY  = './assets/8692941.jpg'
-        SKY  = './assets/sky.jpg'
-        DIRT = './assets/O8WNFV0.jpg'
-        ROCK = './assets/rock.png'
+    """Enumeration of asset paths."""
+    SKY = './assets/sky.jpg'
+    DIRT = './assets/O8WNFV0.jpg'
+    ROCK = './assets/rock.png'
 
 class Block(pygame.sprite.Sprite):
+    """Represents a block in the game."""
     def __init__(self, sprite: Sprite, x = 0, y = 0):
+        """
+        Initializes the Block instance.
+
+        Args:
+            sprite (Sprite): The sprite of the block.
+            x (int): X-coordinate of the block.
+            y (int): Y-coordinate of the block.
+        """
         super().__init__()
         self.x = x
         self.y = y
@@ -33,20 +41,42 @@ class Block(pygame.sprite.Sprite):
         self.surf = pygame.transform.scale(self.surf, (self.sprite.sprite_size, self.sprite.sprite_size))
         self.rect = self.surf.get_rect(center = (self.x, self.y))
 
-    def draw(self, screen):  
+    def draw(self, screen):
+        """
+        Draw the block on the screen.
+
+        Args:
+            screen: The pygame screen.
+        """
         screen.blit(self.surf, self.rect)
     
     def move(self):
+        """Placeholder method for moving the block."""
         pass
 
-
 class Sprite():
+    """Represents a game sprite."""
     def __init__(self, img):
+        """
+        Initializes the Sprite instance.
+
+        Args:
+            img (str): Path to the image file.
+        """
         self.image_path = img
         self.sprite_size = 50
 
 class Player(pygame.sprite.Sprite):
+    """Represents the player in the game."""
     def __init__(self, sprite: Sprite, x = 0, y = 0) -> None:
+        """
+        Initializes the Player instance.
+
+        Args:
+            sprite (Sprite): The sprite of the player.
+            x (int): X-coordinate of the player.
+            y (int): Y-coordinate of the player.
+        """
         super().__init__()
         self.sprite = sprite
         self.x = x
@@ -63,32 +93,41 @@ class Player(pygame.sprite.Sprite):
         self.surf = pygame.transform.scale(self.surf, (self.sprite.sprite_size, self.sprite.sprite_size))
         self.rect = self.surf.get_rect(center = (self.x, self.y))
 
-    def draw(self, screen):  
+    def draw(self, screen):
+        """
+        Draw the player on the screen.
+
+        Args:
+            screen: The pygame screen.
+        """
         screen.blit(self.surf, self.rect)
     
-    def jump(self): 
+    def jump(self):
+        """Make the player jump."""
         hits = pygame.sprite.spritecollide(self, platforms, False)
         if hits and not self.jumping:
             self.jumping = True
             self.vel.y = -12
 
     def cancel_jump(self):
+        """Cancel the player's jump."""
         if self.jumping:
             if self.vel.y < -2:
                 self.vel.y = -2
     
     def move(self):
+        """Move the player."""
         self.acc = vec(0,0.5)
         pressed_keys = pygame.key.get_pressed()
         if pressed_keys[K_LEFT]:
             self.acc.x = -ACC
         if pressed_keys[K_RIGHT]:
             self.acc.x = ACC
-        #Acelerate + Braking
+        # Accelerate + Braking
         self.acc.x += self.vel.x * FRIC
         self.vel += self.acc
         self.pos += self.vel + 0.5 * self.acc
-        #Screen Wrapping
+        # Screen Wrapping
         if self.pos.x > WIDTH:
             self.pos.x = 0
         if self.pos.x < 0:
@@ -97,6 +136,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.midbottom = self.pos
         
     def update(self):
+        """Update the player's position."""
         hits = pygame.sprite.spritecollide(self , platforms, False)
         if self.vel.y > 0: 
             if hits:    	
@@ -124,32 +164,42 @@ class Player(pygame.sprite.Sprite):
                     self.jumping = False
                     self.vel.y = 0
 
-                
-
-# Interface for products - Factory Method
 class Bloque(ABC):
+    """Abstract class representing a block."""
+    @abstractmethod
     def draw(self) -> str:
-        ''' Draw a new block on the screen '''
+        """Draw a new block on the screen."""
         pass
 
-# Concrete products
 class DirtBlock(Bloque):
+    """Concrete class representing a dirt block."""
     def draw(self) -> int:
-        ''' Draw a new dirt block on the screen '''
+        """Draw a new dirt block on the screen."""
         return 1
     
 class RockBlock(Bloque):
+    """Concrete class representing a rock block."""
     def draw(self) -> int:
-        ''' Draw a new rock block on the screen '''
+        """Draw a new rock block on the screen."""
         return 2
     
 class SkyBlock(Bloque):
+    """Concrete class representing a sky block."""
     def draw(self) -> int:
-        ''' Draw a new sky block on the screen '''
+        """Draw a new sky block on the screen."""
         return 0
 	
 class Coin(pygame.sprite.Sprite):
+    """Represents a coin in the game."""
     def __init__(self, sprite: Sprite, x = 0, y = 0):
+        """
+        Initializes the Coin instance.
+
+        Args:
+            sprite (Sprite): The sprite of the coin.
+            x (int): X-coordinate of the coin.
+            y (int): Y-coordinate of the coin.
+        """
         super().__init__()
         self.x = x
         self.y = y
@@ -158,17 +208,28 @@ class Coin(pygame.sprite.Sprite):
         self.surf = pygame.transform.scale(self.surf, (self.sprite.sprite_size, self.sprite.sprite_size))
         self.rect = self.surf.get_rect(center = (self.x, self.y))
  
- 
     def update(self, player: Player):
+        """
+        Update the coin's position and check for collisions with the player.
+
+        Args:
+            player (Player): The player object.
+        """
         if self.rect.colliderect(player.rect):
             player.score += 5
             self.kill()
 
-
 class App():
-    """A class representing a generic platformer game game. """
-    
+    """Represents the main application."""
     def __init__(self, move_speed = 50, sprite_scale = 50/128, sprite_size = 50 ):
+        """
+        Initializes the App instance.
+
+        Args:
+            move_speed (int): The movement speed of the game.
+            sprite_scale (float): The scale of the game sprites.
+            sprite_size (int): The size of the game sprites.
+        """
         self._move_speed = move_speed
         self.sprite_scale = sprite_scale
         self.sprite_size = sprite_size
@@ -188,35 +249,47 @@ class App():
         self.sky = pygame.transform.scale(self.sky, (self.width, self.height))
 
     def generateCoin(self, x, y):
+        """
+        Generate a coin at the specified position.
+
+        Args:
+            x (int): X-coordinate of the coin.
+            y (int): Y-coordinate of the coin.
+        """
         coins.add(Coin(Sprite("./assets/coin.png"), x, y))
 
     def on_init(self) -> bool: 
-        """Called when the program is started"""
+        """Called when the program is started."""
         pygame.init()
         self.screen = pygame.display.set_mode(self.size)
         self._running = True
         self.draw_scenary()
 
-    # Factory
     @abstractmethod
     def create_block(self, tipo) -> Bloque:
-        ''' Factory method '''
+        """Factory method to create a block."""
         return tipo.value
 
     def choose_block(self, tipo) -> int:
-        ''' Choose the block to draw '''
+        """Choose the block to draw."""
         return self.create_block(tipo).draw()
 
-    # def choose_block(self, x: int):
-    #     if x==0:
-    #         return Assets.SKY.value
-    #     if x==1:
-    #         return Assets.DIRT.value
-    
     def draw_sky(self, screen):
+        """
+        Draw the sky background.
+
+        Args:
+            screen: The pygame screen.
+        """
         screen.blit(self.sky, (0, 0))
     
     def draw_block(self, screen):
+        """
+        Draw blocks on the screen.
+
+        Args:
+            screen: The pygame screen.
+        """
         x = 25
         y = 25
         for row in self.scene:
@@ -237,14 +310,11 @@ class App():
                 x +=50
             x = 25
             y+=50
-            
-        
-
 
         return
     
     def draw_scenary(self):
-
+        """Draw the game scenery."""
         self.scene = []
         with open("scene.csv", "r") as csvfile:
             reader = csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC) # change contents to floats
@@ -255,43 +325,48 @@ class App():
         self.draw_block(self.screen)
         
     def on_event(self, event) -> None:
+        """Handle game events."""
         if event.type == pygame.QUIT:
             self._running = False
 
     def on_loop(self):
+        """Update the game state."""
         self.player.update()
         for entity in all_sprites:
             entity.draw(self.screen)
             entity.move()
 
     def on_render(self):
+        """Render game objects."""
         self.player.draw(self.screen)
-        f = pygame.font.SysFont("Verdana", 20)     ##
-        g  = f.render(str(self.player.score), True, (123,255,0))   ##
-        self.screen.blit(g, (WIDTH/2, 10))  
-        #pygame.draw.rect(self.screen,(255,150,140),self.player)
+        f = pygame.font.SysFont("Verdana", 20)
+        g  = f.render(str(self.player.score), True, (123,255,0))
+        self.screen.blit(g, (WIDTH/2, 10))
         if coins:
             for coin in coins:
                 self.screen.blit(coin.surf, coin.rect)
                 coin.update(self.player)
         else: self._running = False
-
-        
-
-    def on_cleanup(self):
+    
+    def end_screen(self):
+        """Show end screen"""
         time.sleep(1)
         self.screen.fill((255,0,0))
-        f = pygame.font.SysFont("Verdana", 20)     ##
-        g  = f.render(str("Game ended!"), True, (0,0,0))   ##
-        self.screen.blit(g, (WIDTH/2 -80, HEIGHT/2))  
+        f = pygame.font.SysFont("Verdana", 20)
+        g  = f.render(str("Game ended!"), True, (0,0,0))
+        self.screen.blit(g, (WIDTH/2 -80, HEIGHT/2))
         g  = f.render(str(f"Score: {self.player.score} points!"), True, (0,0,0)) 
         self.screen.blit(g, (WIDTH/2 -80, HEIGHT/2+50)) 
-
         pygame.display.update()
         time.sleep(3)
+
+    def on_cleanup(self):
+        """Clean up resources, show end screen and exit the game."""
+        self.end_screen()
         pygame.quit()
 
     def on_execute(self) -> None: 
+        """Start the game."""
         pygame.display.set_caption("Platformer")
         if self.on_init() == False:
             self._running = False
@@ -306,7 +381,6 @@ class App():
                     if event.key == pygame.K_UP:
                         self.player.cancel_jump()  
             
-            #self.screen.fill((136,244,255))
             self.draw_sky(self.screen)
 
             self.on_loop()
@@ -315,12 +389,9 @@ class App():
             pygame.display.update()
             self.FramePerSec.tick(FPS)
 
-        self.on_cleanup() #Pygame.quit
-
-
+        self.on_cleanup()
 
 if __name__ == "__main__" :
 
     theApp = App()
     theApp.on_execute()
-        
