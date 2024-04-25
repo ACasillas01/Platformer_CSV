@@ -208,7 +208,7 @@ class Coin(pygame.sprite.Sprite):
         self.surf = pygame.image.load(self.sprite.image_path)
         self.surf = pygame.transform.scale(self.surf, (self.sprite.sprite_size, self.sprite.sprite_size))
         self.rect = self.surf.get_rect(center = (self.x, self.y))
- 
+
     def update(self, player: Player):
         """
         Update on the coin's existance and check for collisions with the player.
@@ -283,19 +283,12 @@ class App():
             screen: The pygame screen.
         """
         screen.blit(self.sky, (0, 0))
-    
-    def draw_block(self, screen): #FLYWEIGHT - PATRON ESTRUCTURAL 
-        """
-        Draw blocks on the screen.
 
-        Args:
-            screen: The pygame screen.
-        """
-        x = 25
-        y = 25
+    @abstractmethod
+    def create_block(self, x: int, y: int) -> Bloque:
         #Flyweight variables
-        dirtSprite = Sprite(Assets.DIRT.value);
-        rockSprite = Sprite(Assets.ROCK.value);
+        dirtSprite = Sprite(Assets.DIRT.value)
+        rockSprite = Sprite(Assets.ROCK.value)
         for row in self.scene:
             for tile in row:
                 if tile == 0:
@@ -316,13 +309,27 @@ class App():
                 x +=50
             x = 25
             y+=50
+    
+    def draw_block(self, screen): #FLYWEIGHT - PATRON ESTRUCTURAL 
+        """
+        Draw blocks on the screen.
 
+        Args:
+            screen: The pygame screen.
+        """
+        self.create_block(25, 25)
         return
     
+    @abstractmethod
+    def create_scene(self) -> str:
+        """Create the game scene."""
+        scene = random.choice(['scene.csv', 'scenario_1.csv', 'scenario_2.csv', 'scenario_3.csv', 'scenario_4.csv', 'scenario_5.csv'])
+        return scene
+
     def draw_scenary(self):
         """Draw the game scenery."""
         self.scene = []
-        with open("scene.csv", "r") as csvfile:
+        with open(self.create_scene(), "r") as csvfile:
             reader = csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC) # change contents to floats
             for row in reader: # each row is a list
                 self.scene.append(row)
